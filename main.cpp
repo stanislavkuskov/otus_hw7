@@ -3,127 +3,120 @@
 #include <iostream>
 #include <vector>
 
-enum class Lang
-{
-    ru, en
-};
+using cmd_arr = std::vector<std::string>;
 
 class Observer {
 public:
-    virtual void update(Lang lang) = 0;
+    virtual void update(cmd_arr commands) = 0;
 };
 
-class Language {
-    Lang lang{Lang::ru};
+class Writer {
+    cmd_arr commands;
     std::vector<Observer *> subs;
 public:
     void subscribe(Observer *obs) {
         subs.push_back(obs);
     }
 
-    void set_language(Lang lang_) {
-        lang = lang_;
+    void run_writing(cmd_arr cmds) {
+        commands = cmds;
         notify();
     }
 
     void notify() {
         for (auto s : subs) {
-            s->update(lang);
+            s->update(commands);
         }
     }
 };
 
-class report_observer : public Observer {
+class CoutObserver : public Observer {
 public:
-    report_observer(Language *lang) {
-        lang->subscribe(this);
+    CoutObserver(Writer *writer) {
+        writer->subscribe(this);
     }
 
-    void update(Lang lang) override {
-        std::cout << "switch report template to lang " << int(lang) << std::endl;
+    void update(cmd_arr commands) override {
+        for (const auto& cmd : commands){
+            std::cout << cmd << " ";
+        }
+        std::cout << std::endl;
     }
 };
 
-class ui_observer : public Observer {
+class FileObserver : public Observer {
 public:
-    ui_observer(Language *lang) {
-        lang->subscribe(this);
+    FileObserver(Writer *writer) {
+        writer->subscribe(this);
     }
 
-    void update(Lang lang) override {
-        std::cout << "refresh ui for lang " << int(lang) << std::endl;
-    }
-};
+    void update(cmd_arr commands) override {
+// TODO запись в файл
+        std::cout << "write in file " << std::endl;
 
-void print_cmds(const std::vector<std::string>& commands){
-    for (const std::string& cmd : commands){
-        std::cout << cmd << " ";
     }
-    std::cout << std::endl;
 };
 
 int main(int, char *[]) {
 
-    std::vector<std::string> commands;
+    Writer writer;
+    CoutObserver couter(&writer);
+    FileObserver filer(&writer);
+
+    cmd_arr commands;
     int N;
     std::cin >> N;
 
-    size_t i = 0;
+    size_t i = 1;
     int nesting = 0;
 
-
+    bool turn = false;
 
     while (true){
         std::string cmd;
         std::cin >> cmd;
-
-        if (cmd == "{"){
-            if ((nesting == 0) and (!commands.empty())){
-                print_cmds(commands);
-                commands.clear();
-                i = 0;
+        {
+            if (cmd == "{"){
+                if ((nesting == 0) and (!commands.empty())){
+                    turn = true;
+                }
+                ++nesting;
             }
-            ++nesting;
-        }
 
-        else if (cmd == "}"){
-            if (nesting == 1){
-                print_cmds(commands);
-                commands.clear();
-                i = 0;
+            else if (cmd == "}"){
+                if (nesting == 1){
+                    turn = true;
+                }
+                --nesting;
             }
-            --nesting;
-        }
 
-        else if (cmd == "<EOF>"){
-            break;
-        }
-
-        else {
-            commands.push_back(cmd);
-        }
-
-        bool is_counted = nesting == 0;
-        if (is_counted){
-            if (i == N){
-                print_cmds(commands);
-                commands.clear();
-                i = 0;
+            else if (cmd == "<EOF>"){
+                break;
             }
-            ++i;
+
+            else {
+                commands.push_back(cmd);
+            }
         }
+
+        {
+            if (nesting == 0){
+                if (i == N){
+                    turn = true;
+                }
+                ++i;
+            }
+
+            if (turn){
+//                print_cmds(commands);
+
+                writer.run_writing(commands);
+                commands.clear();
+                i = 1;
+                turn = false;
+            }
+        }
+
     }
-    return 0;
-
-
-    Language lang;
-
-    report_observer rpt(&lang);
-    ui_observer ui(&lang);
-
-    lang.set_language(Lang::ru);
-
-    lang.set_language(Lang::en);
-
     return 0;
 }
