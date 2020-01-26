@@ -69,52 +69,51 @@ int main(int, char *[]) {
     std::cin >> N;
 
     size_t i = 0;
-//    bool is_opened_block = false;
-//    bool is_closed_block = true;
     int nesting = 0;
 
+
+
     while (true){
-        ++i;
         std::string cmd;
         std::cin >> cmd;
 
         if (cmd == "{"){
-            ++nesting;
-//            is_opened_block = true;
-//            is_closed_block = false;
-            if (nesting == 0){
-                std::cout << nesting;
+            if ((nesting == 0) and (!commands.empty())){
+                print_cmds(commands);
+                commands.clear();
+                i = 0;
             }
-
+            ++nesting;
         }
-        if (cmd == "}"){
+
+        else if (cmd == "}"){
             if (nesting == 1){
                 print_cmds(commands);
+                commands.clear();
+                i = 0;
             }
-
             --nesting;
-//            is_opened_block = false;
-//            is_closed_block = true;
+        }
+
+        else if (cmd == "<EOF>"){
+            break;
+        }
+
+        else {
+            commands.push_back(cmd);
         }
 
         bool is_counted = nesting == 0;
         if (is_counted){
-            commands.push_back(cmd);
             if (i == N){
                 print_cmds(commands);
-                i = 0;
                 commands.clear();
+                i = 0;
             }
+            ++i;
         }
-
-        if (cmd == "<EOF>"){
-
-            break;
-        }
-
     }
     return 0;
-    std::cout << N << std::endl;
 
 
     Language lang;
