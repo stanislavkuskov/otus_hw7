@@ -1,16 +1,21 @@
 // Наблюдатель (Observer)
 
+#include <ctime>
 #include <iostream>
+#include <fstream>
+#include <ostream>
+#include <utility>
 #include <vector>
 
 using cmd_arr = std::vector<std::string>;
 
 class Observer {
 public:
-    virtual void update(cmd_arr commands) = 0;
+    virtual void update(cmd_arr commands, std::string filename) = 0;
 };
 
 class Writer {
+    std::string filename;
     cmd_arr commands;
     std::vector<Observer *> subs;
 public:
@@ -18,14 +23,15 @@ public:
         subs.push_back(obs);
     }
 
-    void run_writing(cmd_arr cmds) {
-        commands = cmds;
+    void run_writing(cmd_arr commands_, std::string filename_) {
+        commands = std::move(commands_);
+        filename = std::move(filename_);
         notify();
     }
 
     void notify() {
         for (auto s : subs) {
-            s->update(commands);
+            s->update(commands, filename);
         }
     }
 };
@@ -36,7 +42,7 @@ public:
         writer->subscribe(this);
     }
 
-    void update(cmd_arr commands) override {
+    void update(cmd_arr commands, std::string filename) override {
         for (const auto& cmd : commands){
             std::cout << cmd << " ";
         }
@@ -50,9 +56,13 @@ public:
         writer->subscribe(this);
     }
 
-    void update(cmd_arr commands) override {
-// TODO запись в файл
-        std::cout << "write in file " << std::endl;
+    void update(cmd_arr commands, std::string filename) override {
+        std::ofstream myfile;
+        myfile.open(filename);
+        for (const auto& cmd : commands){
+            myfile << cmd << "\n";
+        }
+        myfile.close();
 
     }
 };
@@ -66,15 +76,26 @@ int main(int, char *[]) {
     cmd_arr commands;
     int N;
     std::cin >> N;
+    //  some black magic from https://stackoverflow.com/questions/257091/how-do-i-flush-the-cin-buffer
+    //  do not touch it
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     size_t i = 1;
     int nesting = 0;
 
     bool turn = false;
 
+    std::string filename;
     while (true){
         std::string cmd;
-        std::cin >> cmd;
+        std::getline(std::cin, cmd);
+
+        {
+            if (commands.empty()){
+                filename = "bulk" + std::to_string(std::time(nullptr)) + ".log";
+            }
+        }
+
         {
             if (cmd == "{"){
                 if ((nesting == 0) and (!commands.empty())){
@@ -108,9 +129,7 @@ int main(int, char *[]) {
             }
 
             if (turn){
-//                print_cmds(commands);
-
-                writer.run_writing(commands);
+                writer.run_writing(commands, filename);
                 commands.clear();
                 i = 1;
                 turn = false;
