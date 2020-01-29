@@ -74,7 +74,7 @@ int main(int, char *[]) {
     FileObserver filer(&writer);
 
     cmd_arr commands;
-    int N;
+    size_t N;
     std::cin >> N;
     //  some black magic from https://stackoverflow.com/questions/257091/how-do-i-flush-the-cin-buffer
     //  do not touch it
