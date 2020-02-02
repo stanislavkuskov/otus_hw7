@@ -9,6 +9,7 @@
 
 using cmd_arr = std::vector<std::string>;
 
+///Obsrerver
 class Observer {
 public:
     virtual void update(cmd_arr commands, std::string filename) = 0;
@@ -119,7 +120,6 @@ int main(int, char *[]) {
                 commands.push_back(cmd);
             }
         }
-
         {
             if (nesting == 0){
                 if (i == N){
@@ -135,7 +135,6 @@ int main(int, char *[]) {
                 turn = false;
             }
         }
-
     }
     return 0;
 }
