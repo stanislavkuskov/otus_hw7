@@ -44,6 +44,7 @@ public:
     }
 
     void update(cmd_arr commands, std::string filename) override {
+        std::cout << "bulk: ";
         for (const auto& cmd : commands){
             std::cout << cmd << " ";
         }
@@ -68,19 +69,24 @@ public:
     }
 };
 
-int main(int, char *[]) {
+int main(int argc, char* argv[]) {
 
     Writer writer;
     CoutObserver couter(&writer);
     FileObserver filer(&writer);
 
     cmd_arr commands;
-    size_t N;
-    std::cin >> N;
-    //  some black magic from https://stackoverflow.com/questions/257091/how-do-i-flush-the-cin-buffer
-    //  do not touch it
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    size_t N = 3;
 
+    if (argc > 1){
+        try {
+            N = std::stoi(argv[1]);
+        } catch (...){
+            std::cout << "Unrecognized parameter: \"" << argv[1] << "\", try to use int value" << std::endl;
+            return 0;
+        }
+
+    }
     size_t i = 1;
     int nesting = 0;
 
