@@ -9,7 +9,7 @@
 
 using cmd_arr = std::vector<std::string>;
 
-///Obsrerver
+///Obsrerver descriptiom was here )) Base observer class for creating some special observers
 class Observer {
 public:
     virtual void update(cmd_arr commands, std::string filename) = 0;
