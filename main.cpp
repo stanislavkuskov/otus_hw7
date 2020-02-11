@@ -93,48 +93,39 @@ int main(int argc, char* argv[]) {
     bool turn = false;
 
     std::string filename;
-    while (true){
-        std::string cmd;
-        std::getline(std::cin, cmd);
-
+    for (std::string cmd; std::getline(std::cin, cmd);){
         {
-            if (commands.empty()){
+            if (commands.empty()) {
                 filename = "bulk" + std::to_string(std::time(nullptr)) + ".log";
             }
         }
 
         {
-            if (cmd == "{"){
-                if ((nesting == 0) and (!commands.empty())){
+            if (cmd == "{") {
+                if ((nesting == 0) and (!commands.empty())) {
                     turn = true;
                 }
                 ++nesting;
-            }
-
-            else if (cmd == "}"){
-                if (nesting == 1){
+            } else if (cmd == "}") {
+                if (nesting == 1) {
                     turn = true;
                 }
                 --nesting;
-            }
-
-            else if (cmd == "<EOF>"){
+            } else if (cmd == "<EOF>") {
                 break;
-            }
-
-            else {
+            } else {
                 commands.push_back(cmd);
             }
         }
         {
-            if (nesting == 0){
-                if (i == N){
+            if (nesting == 0) {
+                if (i == N) {
                     turn = true;
                 }
                 ++i;
             }
 
-            if (turn){
+            if (turn) {
                 writer.run_writing(commands, filename);
                 commands.clear();
                 i = 1;
