@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
 
     bool turn = false;
 
-    std::string filename;
+    std::string filename = "bulk" + std::to_string(std::time(nullptr)) + ".log";
     for (std::string cmd; std::getline(std::cin, cmd);){
         {
             if (commands.empty()) {
@@ -132,6 +132,9 @@ int main(int argc, char* argv[]) {
                 turn = false;
             }
         }
+    }
+    if (!commands.empty()) {
+        writer.run_writing(commands, filename);
     }
     return 0;
 }
