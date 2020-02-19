@@ -134,7 +134,11 @@ int main(int argc, char* argv[]) {
         }
     }
     if (!commands.empty()) {
-        writer.run_writing(commands, filename);
+        std::cout << nesting << std::endl;
+        if (nesting == 0){
+            writer.run_writing(commands, filename);
+        }
     }
+
     return 0;
 }
